@@ -18,7 +18,6 @@ A lightweight job scheduling system built with Node.js using `express` and `node
 
 - [Node.js](https://nodejs.org/)
 - [Express](https://expressjs.com/)
-- [node-cron](https://www.npmjs.com/package/node-cron)
 - [body-parser](https://www.npmjs.com/package/body-parser)
 
 ---
@@ -26,7 +25,7 @@ A lightweight job scheduling system built with Node.js using `express` and `node
 ## 📦 Installation
 
 ```bash
-git clone https://github.com/yourusername/job-scheduler-node.git
+git clone https://github.com/Zivanika/job-scheduler-node.git
 cd job-scheduler-node
 npm install
 ```
@@ -37,13 +36,20 @@ npm install
 node index.js
 ```
 
-## 🔌 API Endpoints
-
+🔌 API Endpoints
 🧪 POST /schedule
-
-- Schedules a new job.
-
+Schedules a new job.
 Request Body (JSON):
+➤ Minute Job (runs every hour at specified minute):
+
+```json
+{
+  "name": "hello_minute",
+  "type": "minute",
+  "minute": 30
+}
+```
+
 ➤ Hourly Job:
 
 ```json
@@ -53,34 +59,124 @@ Request Body (JSON):
   "minute": 15
 }
 ```
+
 ➤ Daily Job:
+
 ```json
 {
   "name": "hello_daily",
   "type": "daily",
-  "minute": 0,
-  "hour": 12
+  "minute": 30,
+  "hour": 14
 }
 ```
+
 ➤ Weekly Job:
+
 ```json
 {
   "name": "hello_weekly",
   "type": "weekly",
   "minute": 0,
-  "hour": 10,
+  "hour": 9,
   "dayOfWeek": 1
 }
 ```
-Note: dayOfWeek is 0 (Sunday) to 6 (Saturday)
+
+Parameters:
+
+name (string): Unique identifier for the job
+type (string): Job frequency - "minute", "hourly", "daily", or "weekly"
+minute (number): Minute of the hour (0-59)
+hour (number): Hour of the day (0-23) - required for daily/weekly jobs
+dayOfWeek (number): Day of the week (0-6, where 0=Sunday) - required for weekly jobs
+
+Response:
+
+```json
+{
+  "message": "Job scheduled successfully",
+  "pattern": "Daily at 14:30",
+  "config": {
+    "type": "daily",
+    "minute": 30,
+    "hour": 14
+  }
+}
+```
 
 🛑 POST /stop
-- Stops an active job.
+Stops and removes a scheduled job.
+Request Body (JSON):
 
-Request Body:
 ```json
 {
   "name": "hello_hourly"
+}
+```
+
+Response:
+
+```json
+{
+  "message": "Job stopped and removed successfully"
+}
+```
+
+📋 GET /jobs
+Lists all scheduled jobs with their current status.
+Response:
+
+```json
+{
+  "jobs": [
+    {
+      "name": "hello_hourly",
+      "type": "hourly",
+      "minute": 15,
+      "hour": 0,
+      "dayOfWeek": 0,
+      "lastRun": "2025-06-05T10:15:00.000Z",
+      "isActive": true
+    },
+    {
+      "name": "daily_report",
+      "type": "daily",
+      "minute": 30,
+      "hour": 14,
+      "dayOfWeek": 0,
+      "lastRun": null,
+      "isActive": true
+    }
+  ]
+}
+```
+
+🔍 GET /jobs/:name
+Gets detailed information about a specific job.
+Parameters:
+
+name (path parameter): The name of the job to retrieve
+
+Response:
+
+```json
+{
+  "name": "hello_hourly",
+  "type": "hourly",
+  "minute": 15,
+  "hour": 0,
+  "dayOfWeek": 0,
+  "lastRun": "2025-06-05T10:15:00.000Z",
+  "isActive": true
+}
+```
+
+Error Response (404):
+
+```json
+{
+  "message": "Job not found"
 }
 ```
 
